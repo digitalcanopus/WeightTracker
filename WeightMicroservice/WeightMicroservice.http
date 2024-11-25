@@ -1,0 +1,6 @@
+@WeightTracker_HostAddress = http://localhost:5168
+
+GET {{WeightTracker_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

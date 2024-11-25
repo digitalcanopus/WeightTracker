@@ -1,0 +1,33 @@
+﻿services:
+  weight:
+    image: weight-api
+    container_name: weightapi
+    build:
+      context: ../WeightMicroservice
+      dockerfile: Dockerfile
+    ports:
+      - "5001:8080"
+    depends_on:
+      - mongodb
+    env_file:
+      - local.env
+  user:
+    image: user-api
+    container_name: userapi
+    build:
+      context: ../UserMicroservice
+      dockerfile: Dockerfile
+    ports:
+      - "5002:8080"
+  mongodb:
+    image: mongo:8.0.3
+    container_name: mongodb
+    ports:
+      - "27018:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=Oganesson123
+    volumes:
+      - ../mongo_data:/data/db
+volumes:
+  mongo_data:
