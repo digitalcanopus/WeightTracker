@@ -33,7 +33,7 @@ namespace WeightTracker.Controllers
                 _ => NotFound());
         }
 
-        [HttpPost("~/api/weights/add")]
+        [HttpPost("~/api/weights")]
         public async Task<IActionResult> AddWeight([FromBody] AddWeightRequest addWeightRequest,
             CancellationToken cancellationToken = default)
         {
@@ -44,7 +44,7 @@ namespace WeightTracker.Controllers
                 _ => NotFound());
         }
 
-        [HttpPut("~/api/weights/edit/{weightId:length(24)}")]
+        [HttpPut("~/api/weights/{weightId:length(24)}")]
         public async Task<IActionResult> EditWeight([FromRoute] string weightId,
             [FromBody] EditWeightRequest editWeightRequest,
             CancellationToken cancellationToken = default)
@@ -56,13 +56,13 @@ namespace WeightTracker.Controllers
                 _ => NotFound());
         }
 
-        [HttpPatch("~/api/weights/{weightId:length(24)}/deleteFile/{fileId:length(24)}")]
+        [HttpDelete("~/api/weights/{weightId:length(24)}/files/{fileId:length(24)}")]
         public async Task<IActionResult> DeleteFileFromWeight()
         {
             return Ok();
         }
 
-        [HttpDelete("~/api/weights/delete/{weightId:length(24)}")]
+        [HttpDelete("~/api/weights/{weightId:length(24)}")]
         public async Task<IActionResult> DeleteWeight()
         {
             return Ok();
