@@ -8,7 +8,7 @@
     ports:
       - "5001:8080"
     depends_on:
-      - mongodb
+      - db-weight
     env_file:
       - local.env
   user:
@@ -19,15 +19,28 @@
       dockerfile: Dockerfile
     ports:
       - "5002:8080"
-  mongodb:
+    depends_on:
+      - db-user
+  db-weight:
     image: mongo:8.0.3
-    container_name: mongodb
+    container_name: dbweight
     ports:
       - "27018:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=Oganesson123
     volumes:
-      - ../mongo_data:/data/db
+      - ../mongo_weight:/data/db
+  db-user:
+    image: mongo:8.0.3
+    container_name: dbuser
+    ports:
+      - "27019:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=Oganesson123
+    volumes:
+      - ../mongo_user:/data/db
 volumes:
-  mongo_data:
+  mongo_weight:
+  mongo_user:  

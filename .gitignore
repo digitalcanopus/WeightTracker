@@ -10,8 +10,9 @@
 *.userosscache
 *.sln.docstates
 
-# File storage
-mongo_data
+# File storages
+mongo_user
+mongo_weight
 
 # Application settings
 appsettings.json

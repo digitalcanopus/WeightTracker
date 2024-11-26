@@ -18,7 +18,7 @@ builder.Services.Configure<MongoDbSettings>(
 builder.Services.AddSingleton<IMongoClient>(sp =>
 {
     var settings = sp.GetRequiredService<IOptions<MongoDbSettings>>().Value;
-    var dbHostname = Environment.GetEnvironmentVariable("DATABASE_HOSTNAME");
+    var dbHostname = Environment.GetEnvironmentVariable("DATABASE_WEIGHT_HOSTNAME");
     var dbPort = Environment.GetEnvironmentVariable("DATABASE_PORT");
     var dbUsername = Environment.GetEnvironmentVariable("DATABASE_USERNAME");
     var dbPassword = Environment.GetEnvironmentVariable("DATABASE_PASSWORD");
