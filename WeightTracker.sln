@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastru
 		Infrastructure\local.env = Infrastructure\local.env
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiGateway", "ApiGateway\ApiGateway.csproj", "{4FD93378-86B9-488D-B621-0E3AA74BB084}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{969CF616-63BC-4A20-89E7-B207D4BF449F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{969CF616-63BC-4A20-89E7-B207D4BF449F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{969CF616-63BC-4A20-89E7-B207D4BF449F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4FD93378-86B9-488D-B621-0E3AA74BB084}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FD93378-86B9-488D-B621-0E3AA74BB084}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FD93378-86B9-488D-B621-0E3AA74BB084}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FD93378-86B9-488D-B621-0E3AA74BB084}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,12 +1,23 @@
 ﻿services:
+  gateway:
+    image: api-gateway
+    container_name: apigateway
+    build:
+      context: ../ApiGateway
+      dockerfile: Dockerfile
+    ports:
+      - "5003:8080"
+    depends_on:
+      - weight
+      - user
+    env_file:
+      - local.env
   weight:
     image: weight-api
     container_name: weightapi
     build:
       context: ../WeightMicroservice
       dockerfile: Dockerfile
-    ports:
-      - "5001:8080"
     depends_on:
       - db-weight
     env_file:
@@ -17,8 +28,6 @@
     build:
       context: ../UserMicroservice
       dockerfile: Dockerfile
-    ports:
-      - "5002:8080"
     depends_on:
       - db-user
   db-weight:
