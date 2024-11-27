@@ -1,6 +1,5 @@
 ﻿using ApiGateway.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace ApiGateway.Controllers
 {
@@ -22,7 +21,7 @@ namespace ApiGateway.Controllers
         {
             var weightServiceUrl = $"{_microserviceEndpoints.WeightMicroservice}/api/weights/{id}";
             Console.WriteLine(_microserviceEndpoints.WeightMicroservice);
-            return await _httpService.ForwardRequest(weightServiceUrl);
+            return await _httpService.ForwardGetRequest(weightServiceUrl);
         }
     }
 }
