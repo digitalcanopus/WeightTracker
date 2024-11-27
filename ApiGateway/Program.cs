@@ -10,7 +10,7 @@ builder.Services.AddSwaggerGen();
 
 var microserviceEndpoints = ServiceEndpointsHelper.GetServiceEndpoints(builder.Configuration);
 builder.Services.AddSingleton(microserviceEndpoints);
-builder.Services.AddSingleton<HttpService>();
+builder.Services.AddSingleton<IHttpService, HttpService>();
 
 builder.Services.AddHttpClient();
 
