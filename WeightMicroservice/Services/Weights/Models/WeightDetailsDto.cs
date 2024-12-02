@@ -1,11 +1,13 @@
-﻿namespace WeightTracker.Services.Weights.Models
+﻿using WeightMicroservice.Services.Weights.Models;
+
+namespace WeightTracker.Services.Weights.Models
 {
     public record WeightDetailsDto
-    (
-        string Id,
-        decimal WeightValue,
-        DateTime Date,
-        string[]? Files,
-        string UserId
-    );
+    {
+        public string Id { get; set; } = null!;
+        public decimal WeightValue { get; set; }
+        public DateTime Date { get; set; }
+        public List<FileDetailsDto>? Files { get; set; }
+        public string UserId { get; set; } = null!;
+    }
 }

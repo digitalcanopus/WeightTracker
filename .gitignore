@@ -17,6 +17,9 @@ mongo_weight
 # Application settings
 appsettings.json
 
+# Files folder
+uploads
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

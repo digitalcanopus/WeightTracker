@@ -9,7 +9,10 @@ namespace WeightTracker.Entities
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; } = null!;
 
-        [BsonElement("file_path")]
-        public string FilePath { get; set; } = null!;
+        [BsonElement("original_name")]
+        public string OriginalName { get; set; } = null!;
+
+        [BsonElement("extension")]
+        public string Extension { get; set; } = null!;
     }
 }

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using WeightMicroservice.Services.Files;
 using WeightTracker.Services.Weights;
 using WeightTracker.Settings;
 
@@ -28,8 +29,6 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
         ? $"mongodb://{dbUsername}:{dbPassword}@{dbHostname}:{dbPort}/"
         : settings.ConnectionString;
 
-    Console.WriteLine(connectionString);
-
     return new MongoClient(connectionString);
 });
 
@@ -42,7 +41,14 @@ builder.Services.AddScoped<IMongoDatabase>(sp =>
     return client.GetDatabase(env ?? settings.DatabaseName);
 });
 
+builder.Services.AddSingleton(_ =>
+{
+    var defaultFileFolder = builder.Configuration["FileSettings:UploadsFolder"]!;
+    return Environment.GetEnvironmentVariable("LOCAL_FILE_FOLDER_PATH") ?? defaultFileFolder;
+});
+
 builder.Services.AddScoped<IWeightService, WeightService>();
+builder.Services.AddTransient<IFileService, LocalFileService>();
 
 var app = builder.Build();
 
