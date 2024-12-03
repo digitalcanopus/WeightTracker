@@ -17,7 +17,7 @@ namespace WeightTracker.Entities
 
         [BsonElement("files")]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string[]? Files { get; set; }
+        public string[] Files { get; set; } = null!;
 
         [BsonElement("user")]
         [BsonRepresentation(BsonType.ObjectId)]

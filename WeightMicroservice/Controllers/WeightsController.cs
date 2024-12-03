@@ -1,8 +1,9 @@
 ﻿using Mapster;
 using Microsoft.AspNetCore.Mvc;
-using OneOf;
 using WeightTracker.Services.Weights;
 using WeightTracker.Services.Weights.Requests;
+using WeightMicroservice.Services.Weights.Responses;
+using WeightMicroservice.Services.Weights.Requests;
 
 namespace WeightTracker.Controllers
 {
@@ -40,7 +41,7 @@ namespace WeightTracker.Controllers
             var result = await _weightService.AddWeightAsync(addWeightRequest, cancellationToken);
 
             return result.Match<IActionResult>(
-                weight => Ok(weight.Adapt<WeightDetailsResponse>()),
+                Ok,
                 _ => NotFound());
         }
 
@@ -52,20 +53,43 @@ namespace WeightTracker.Controllers
             var result = await _weightService.EditWeightAsync(weightId, editWeightRequest, cancellationToken);
 
             return result.Match<IActionResult>(
-                weight => Ok(weight.Adapt<WeightDetailsResponse>()),
+                Ok,
+                _ => NotFound());
+        }
+
+        [HttpPost("~/api/weights/{weightId:length(24)}/files")]
+        public async Task<IActionResult> AddFileToWeight([FromRoute] string weightId,
+            [FromForm] AddFileRequest addFileRequest,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await _weightService.AddFileToWeightAsync(weightId, addFileRequest, cancellationToken);
+
+            return result.Match<IActionResult>(
+                Ok,
                 _ => NotFound());
         }
 
         [HttpDelete("~/api/weights/{weightId:length(24)}/files/{fileId:length(24)}")]
-        public async Task<IActionResult> DeleteFileFromWeight()
+        public async Task<IActionResult> DeleteFileFromWeight([FromRoute] string weightId,
+            [FromRoute] string fileId,
+            CancellationToken cancellationToken = default)
         {
-            return Ok();
+            var result = await _weightService.DeleteFileFromWeightAsync(weightId, fileId, cancellationToken);
+
+            return result.Match<IActionResult>(
+                Ok,
+                _ => NotFound());
         }
 
         [HttpDelete("~/api/weights/{weightId:length(24)}")]
-        public async Task<IActionResult> DeleteWeight()
+        public async Task<IActionResult> DeleteWeight([FromRoute] string weightId,
+            CancellationToken cancellationToken = default)
         {
-            return Ok();
+            var result = await _weightService.DeleteWeightAsync(weightId, cancellationToken);
+
+            return result.Match<IActionResult>(
+                Ok,
+                _ => NotFound());
         }
     }
 }

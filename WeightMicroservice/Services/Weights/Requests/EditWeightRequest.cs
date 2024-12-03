@@ -4,7 +4,6 @@
     (
         decimal WeightValue,
         DateTime Date,
-        IFormFile[]? Files,
         string UserId
     );
 }
