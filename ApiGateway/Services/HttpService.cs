@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ApiGateway.Models.Weights;
+using Microsoft.AspNetCore.Mvc;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
@@ -43,7 +45,22 @@ namespace ApiGateway.Services
             return await CreateActionResultFromResponse(response);
         }
 
-        private async Task<IActionResult> CreateActionResultFromResponse(HttpResponseMessage response)
+        public async Task<IActionResult> ForwardMultipartRequest<T>(string url, T body)
+        {
+            var multipartContent = new MultipartFormDataContent();
+
+            if (body is AddFileRequest fileRequest && fileRequest.File != null)
+            {
+                var fileStreamContent = new StreamContent(fileRequest.File.OpenReadStream());
+                fileStreamContent.Headers.ContentType = new MediaTypeHeaderValue(fileRequest.File.ContentType);
+                multipartContent.Add(fileStreamContent, "File", fileRequest.File.FileName);
+            }
+
+            var response = await _httpClient.PostAsync(url, multipartContent);
+            return await CreateActionResultFromResponse(response);
+        }
+
+        private static async Task<IActionResult> CreateActionResultFromResponse(HttpResponseMessage response)
         {
             if (!response.IsSuccessStatusCode)
             {

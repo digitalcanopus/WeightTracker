@@ -8,5 +8,6 @@ namespace ApiGateway.Services
         public Task<IActionResult> ForwardPostRequest<T>(string url, T body);
         public Task<IActionResult> ForwardPutRequest<T>(string url, T body);
         public Task<IActionResult> ForwardDeleteRequest(string url);
+        public Task<IActionResult> ForwardMultipartRequest<T>(string url, T body);
     }
 }
