@@ -7,11 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+	<PackageReference Include="Mapster" Version="7.4.0" />
+	<PackageReference Include="MongoDB.Driver" Version="3.0.0" />
+	<PackageReference Include="OneOf" Version="3.0.271" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers\" />
   </ItemGroup>
 
 </Project>
