@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using UserMicroservice.Services.Tokens;
+using UserMicroservice.Services.Users;
 using UserMicroservice.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,6 +40,19 @@ builder.Services.AddScoped<IMongoDatabase>(sp =>
     var env = Environment.GetEnvironmentVariable("DATABASE_NAME");
     return client.GetDatabase(env ?? settings.DatabaseName);
 });
+
+var jwtSettings = builder.Configuration.GetSection("JWT").Get<JwtSettings>() ?? new JwtSettings
+{
+    Key = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")!,
+    Issuer = Environment.GetEnvironmentVariable("JWT_ISSUER")!,
+    Audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")!,
+    ExpMin = int.Parse(Environment.GetEnvironmentVariable("JWT_EXP_MIN")!)
+};
+
+builder.Services.AddSingleton(jwtSettings);
+
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
