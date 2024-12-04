@@ -152,7 +152,7 @@ namespace WeightTracker.Services.Weights
             await _weights
                 .UpdateOneAsync(w => w.Id == weightId, update, cancellationToken: cancellationToken);
 
-            return weight.Id;
+            return fileToInsert.Id;
         }
 
         public async Task<OneOf<string, NotFound>> DeleteFileFromWeightAsync(

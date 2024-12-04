@@ -41,7 +41,7 @@ namespace WeightTracker.Controllers
             var result = await _weightService.AddWeightAsync(addWeightRequest, cancellationToken);
 
             return result.Match<IActionResult>(
-                Ok,
+                weightId => Ok(new { weightId }),
                 _ => NotFound());
         }
 
@@ -53,7 +53,7 @@ namespace WeightTracker.Controllers
             var result = await _weightService.EditWeightAsync(weightId, editWeightRequest, cancellationToken);
 
             return result.Match<IActionResult>(
-                Ok,
+                weightId => Ok(new { weightId }),
                 _ => NotFound());
         }
 
@@ -65,7 +65,7 @@ namespace WeightTracker.Controllers
             var result = await _weightService.AddFileToWeightAsync(weightId, addFileRequest, cancellationToken);
 
             return result.Match<IActionResult>(
-                Ok,
+                fileId => Ok(new { fileId }),
                 _ => NotFound());
         }
 
@@ -77,7 +77,7 @@ namespace WeightTracker.Controllers
             var result = await _weightService.DeleteFileFromWeightAsync(weightId, fileId, cancellationToken);
 
             return result.Match<IActionResult>(
-                Ok,
+                fileId => Ok(new { fileId }),
                 _ => NotFound());
         }
 
@@ -88,7 +88,7 @@ namespace WeightTracker.Controllers
             var result = await _weightService.DeleteWeightAsync(weightId, cancellationToken);
 
             return result.Match<IActionResult>(
-                Ok,
+                weightId => Ok(new { weightId }),
                 _ => NotFound());
         }
     }
