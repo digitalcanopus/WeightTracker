@@ -30,6 +30,8 @@
       dockerfile: Dockerfile
     depends_on:
       - db-user
+    env_file:
+      - local.env
   db-weight:
     image: mongo:8.0.3
     container_name: dbweight
