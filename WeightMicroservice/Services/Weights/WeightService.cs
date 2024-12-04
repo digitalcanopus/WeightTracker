@@ -6,9 +6,9 @@ using WeightTracker.Services.Weights.Models;
 using Mapster;
 using WeightTracker.Services.Weights.Requests;
 using File = WeightTracker.Entities.File;
-using WeightMicroservice.Services.Weights.Models;
 using WeightMicroservice.Services.Files;
 using WeightMicroservice.Services.Weights.Requests;
+using WeightMicroservice.Services.Files.Models;
 
 namespace WeightTracker.Services.Weights
 {

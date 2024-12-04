@@ -1,4 +1,4 @@
-﻿using WeightMicroservice.Services.Weights.Models;
+﻿using WeightMicroservice.Services.Files.Models;
 
 namespace WeightMicroservice.Services.Weights.Responses
 {

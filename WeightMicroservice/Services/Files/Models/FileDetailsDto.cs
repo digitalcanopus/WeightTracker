@@ -1,4 +1,4 @@
-﻿namespace WeightMicroservice.Services.Weights.Models
+﻿namespace WeightMicroservice.Services.Files.Models
 {
     public record FileDetailsDto
     (
