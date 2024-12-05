@@ -20,7 +20,8 @@ namespace UserMicroservice.Services.Tokens
         {
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, userDetails.Username)
+                new Claim("userId", userDetails.Id),
+                new Claim("userName", userDetails.Username)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
