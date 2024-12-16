@@ -15,37 +15,33 @@ namespace ApiGateway.Services
             _httpClient = httpClient;
         }
 
-        public async Task<IActionResult> ForwardGetRequest(string url)
+        public async Task<IActionResult> ForwardGetRequest(string url, string? userId = null)
         {
-            var response = await _httpClient.GetAsync(url);
-            return await CreateActionResultFromResponse(response);
+            return await ForwardRequest(HttpMethod.Get, url, userId);
         }
 
-        public async Task<IActionResult> ForwardPostRequest<T>(string url, T body)
-        {
-            var json = JsonSerializer.Serialize(body);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var response = await _httpClient.PostAsync(url, content);
-            return await CreateActionResultFromResponse(response);
-        }
-
-        public async Task<IActionResult> ForwardPutRequest<T>(string url, T body)
+        public async Task<IActionResult> ForwardPostRequest<T>(string url, T body, string? userId = null)
         {
             var json = JsonSerializer.Serialize(body);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PutAsync(url, content);
-            return await CreateActionResultFromResponse(response);
+            return await ForwardRequest(HttpMethod.Post, url, userId, content);
         }
 
-        public async Task<IActionResult> ForwardDeleteRequest(string url)
+        public async Task<IActionResult> ForwardPutRequest<T>(string url, T body, string? userId = null)
         {
-            var response = await _httpClient.DeleteAsync(url);
-            return await CreateActionResultFromResponse(response);
+            var json = JsonSerializer.Serialize(body);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            return await ForwardRequest(HttpMethod.Put, url, userId, content);
         }
 
-        public async Task<IActionResult> ForwardMultipartRequest<T>(string url, T body)
+        public async Task<IActionResult> ForwardDeleteRequest(string url, string? userId = null)
+        {
+            return await ForwardRequest(HttpMethod.Delete, url, userId);
+        }
+
+        public async Task<IActionResult> ForwardMultipartRequest<T>(string url, T body, string? userId = null)
         {
             var multipartContent = new MultipartFormDataContent();
 
@@ -56,7 +52,21 @@ namespace ApiGateway.Services
                 multipartContent.Add(fileStreamContent, "File", fileRequest.File.FileName);
             }
 
-            var response = await _httpClient.PostAsync(url, multipartContent);
+            return await ForwardRequest(HttpMethod.Post, url, userId, multipartContent);
+        }
+
+        private async Task<IActionResult> ForwardRequest(HttpMethod method, string url, string? userId = null, HttpContent? content = null)
+        {
+            var request = new HttpRequestMessage(method, url);
+
+            if (userId != null)
+                request.Headers.Add("X-User-Id", userId);
+
+            if (content != null)
+                request.Content = content;
+
+            var response = await _httpClient.SendAsync(request);
+
             return await CreateActionResultFromResponse(response);
         }
 
