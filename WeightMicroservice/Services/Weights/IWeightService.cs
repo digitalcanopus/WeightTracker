@@ -9,32 +9,39 @@ namespace WeightTracker.Services.Weights
     public interface IWeightService
     {
         public Task<OneOf<List<WeightDetailsDto>, NotFound>> GetWeightsAsync(
+            string userId,
             CancellationToken cancellationToken = default);
 
         public Task<OneOf<WeightDetailsDto, NotFound>> GetWeightByIdAsync(
+            string userId,
             string weightId,
             CancellationToken cancellationToken = default);
 
         public Task<OneOf<string, NotFound>> AddWeightAsync(
+            string userId,
             AddWeightRequest addWeightRequest,
             CancellationToken cancellationToken = default);
 
         public Task<OneOf<string, NotFound>> EditWeightAsync(
+            string userId,
             string weightId,
             EditWeightRequest editWeightRequest,
             CancellationToken cancellationToken = default);
 
         public Task<OneOf<string, NotFound>> AddFileToWeightAsync(
+            string userId,
             string weightId,
             AddFileRequest addFileRequest,
             CancellationToken cancellationToken = default);
 
         public Task<OneOf<string, NotFound>> DeleteFileFromWeightAsync(
+            string userId,
             string weightId,
             string fileId,
             CancellationToken cancellationToken = default);
 
         public Task<OneOf<string, NotFound>> DeleteWeightAsync(
+            string userId,
             string weightId,
             CancellationToken cancellationToken = default);
     }

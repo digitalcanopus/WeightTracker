@@ -28,10 +28,11 @@ namespace WeightTracker.Services.Weights
         }
 
         public async Task<OneOf<List<WeightDetailsDto>, NotFound>> GetWeightsAsync(
+            string userId,
             CancellationToken cancellationToken = default)
         {
             var weights = await _weights
-                .Find(_ => true)
+                .Find(w => w.UserId == userId)
                 .ToListAsync(cancellationToken);
 
             if (weights.Count == 0)
@@ -53,15 +54,16 @@ namespace WeightTracker.Services.Weights
                 UserId = weight.UserId
             }).ToList();
 
-            return OneOf<List<WeightDetailsDto>, NotFound>.FromT0(result);
+            return result;
         }
 
         public async Task<OneOf<WeightDetailsDto, NotFound>> GetWeightByIdAsync(
+            string userId,
             string weightId,
             CancellationToken cancellationToken = default)
         {
             var weight = await _weights
-                .Find(w => w.Id == weightId)
+                .Find(w => w.Id == weightId && w.UserId == userId)
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (weight == null)
@@ -84,14 +86,16 @@ namespace WeightTracker.Services.Weights
                 UserId = weight.UserId
             };
 
-            return OneOf<WeightDetailsDto, NotFound>.FromT0(result.Adapt<WeightDetailsDto>());
+            return result.Adapt<WeightDetailsDto>();
         }
 
         public async Task<OneOf<string, NotFound>> AddWeightAsync(
+            string userId,
             AddWeightRequest addWeightRequest,
             CancellationToken cancellationToken = default)
         {
             var weightToAdd = addWeightRequest.Adapt<Weight>();
+            weightToAdd.UserId = userId;
             weightToAdd.Files = [];
 
             await _weights
@@ -101,12 +105,13 @@ namespace WeightTracker.Services.Weights
         }
 
         public async Task<OneOf<string, NotFound>> EditWeightAsync(
+            string userId,
             string weightId,
             EditWeightRequest editWeightRequest,
             CancellationToken cancellationToken = default)
         {
             var weight = await _weights
-                .Find(w => w.Id == weightId)
+                .Find(w => w.Id == weightId && w.UserId == userId)
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (weight == null)
@@ -117,18 +122,19 @@ namespace WeightTracker.Services.Weights
                 .Set(w => w.WeightValue, editWeightRequest.WeightValue);
 
             await _weights
-                .UpdateOneAsync(w => w.Id == weightId, update, cancellationToken: cancellationToken);
+                .UpdateOneAsync(w => w.Id == weightId && w.UserId == userId, update, cancellationToken: cancellationToken);
 
             return weight.Id;
         }
 
         public async Task<OneOf<string, NotFound>> AddFileToWeightAsync(
+            string userId,
             string weightId,
             AddFileRequest addFileRequest,
             CancellationToken cancellationToken = default)
         {
             var weight = await _weights
-                .Find(w => w.Id == weightId)
+                .Find(w => w.Id == weightId && w.UserId == userId)
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (weight == null)
@@ -150,18 +156,20 @@ namespace WeightTracker.Services.Weights
                 .Push(w => w.Files, fileToInsert.Id);
 
             await _weights
-                .UpdateOneAsync(w => w.Id == weightId, update, cancellationToken: cancellationToken);
+                .UpdateOneAsync(w => w.Id == weightId && w.UserId == userId, update, cancellationToken: cancellationToken);
 
             return fileToInsert.Id;
         }
 
         public async Task<OneOf<string, NotFound>> DeleteFileFromWeightAsync(
+            string userId,
             string weightId,
             string fileId,
             CancellationToken cancellationToken = default)
         {
             var weight = await _weights
                 .Find(w => w.Id == weightId
+                    && w.UserId == userId
                     && w.Files != null
                     && w.Files.Contains(fileId))
                 .FirstOrDefaultAsync(cancellationToken);
@@ -180,7 +188,7 @@ namespace WeightTracker.Services.Weights
                 .Pull(w => w.Files, fileId);
 
             await _weights
-                .UpdateOneAsync(w => w.Id == weightId, update, cancellationToken: cancellationToken);
+                .UpdateOneAsync(w => w.Id == weightId && w.UserId == userId, update, cancellationToken: cancellationToken);
 
             await _files
                 .DeleteOneAsync(f => f.Id == fileId, cancellationToken: cancellationToken);
@@ -199,18 +207,19 @@ namespace WeightTracker.Services.Weights
         }
 
         public async Task<OneOf<string, NotFound>> DeleteWeightAsync(
+            string userId,
             string weightId,
             CancellationToken cancellationToken = default)
         {
             var weightToDelete = await _weights
-                .Find(w => w.Id == weightId)
+                .Find(w => w.Id == weightId && w.UserId == userId)
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (weightToDelete == null)
                 return new NotFound();
 
             await _weights
-                .DeleteOneAsync(w => w.Id == weightId, cancellationToken);
+                .DeleteOneAsync(w => w.Id == weightId && w.UserId == userId, cancellationToken);
 
             if (weightToDelete.Files == null || weightToDelete.Files.Length == 0)
                 return weightToDelete.Id;

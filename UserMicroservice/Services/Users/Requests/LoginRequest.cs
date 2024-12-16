@@ -1,8 +1,8 @@
 ﻿namespace UserMicroservice.Services.Users.Requests
 {
     public record LoginRequest
-    (
-        string Username,
-        string Password
-    );
+    {
+        public string Username { get; set; } = null!;
+        public string Password { get; set; } = null!;
+    }
 }

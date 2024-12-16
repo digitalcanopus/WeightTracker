@@ -7,7 +7,6 @@ namespace WeightMicroservice.Services.Weights.Responses
         string Id,
         decimal WeightValue,
         DateTime Date,
-        List<FileDetailsDto>? Files,
-        string UserId
+        List<FileDetailsDto>? Files
     );
 }

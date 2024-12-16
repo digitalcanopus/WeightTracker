@@ -3,7 +3,6 @@
     public record AddWeightRequest 
     (
         decimal WeightValue,
-        DateTime Date,
-        string UserId
+        DateTime Date
     );
 }

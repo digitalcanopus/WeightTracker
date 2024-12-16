@@ -16,7 +16,12 @@ namespace WeightTracker.Controllers
         [HttpGet("~/api/weights")]
         public async Task<IActionResult> GetWeights(CancellationToken cancellationToken = default)
         {
-            var result = await _weightService.GetWeightsAsync(cancellationToken);
+            if (!Request.Headers.TryGetValue("X-User-Id", out var userId))
+            {
+                return BadRequest("User ID header is missing.");
+            }
+
+            var result = await _weightService.GetWeightsAsync(userId!, cancellationToken);
 
             return result.Match<IActionResult>(
                 weights => Ok(weights.Adapt<List<WeightDetailsResponse>>()),
@@ -27,7 +32,12 @@ namespace WeightTracker.Controllers
         public async Task<IActionResult> GetWeightById([FromRoute] string weightId,
             CancellationToken cancellationToken = default)
         {
-            var result = await _weightService.GetWeightByIdAsync(weightId, cancellationToken);
+            if (!Request.Headers.TryGetValue("X-User-Id", out var userId))
+            {
+                return BadRequest("User ID header is missing.");
+            }
+
+            var result = await _weightService.GetWeightByIdAsync(userId!, weightId, cancellationToken);
 
             return result.Match<IActionResult>(
                 weight => Ok(weight.Adapt<WeightDetailsResponse>()),
@@ -38,7 +48,12 @@ namespace WeightTracker.Controllers
         public async Task<IActionResult> AddWeight([FromBody] AddWeightRequest addWeightRequest,
             CancellationToken cancellationToken = default)
         {
-            var result = await _weightService.AddWeightAsync(addWeightRequest, cancellationToken);
+            if (!Request.Headers.TryGetValue("X-User-Id", out var userId))
+            {
+                return BadRequest("User ID header is missing.");
+            }
+
+            var result = await _weightService.AddWeightAsync(userId!, addWeightRequest, cancellationToken);
 
             return result.Match<IActionResult>(
                 weightId => Ok(new { weightId }),
@@ -50,7 +65,12 @@ namespace WeightTracker.Controllers
             [FromBody] EditWeightRequest editWeightRequest,
             CancellationToken cancellationToken = default)
         {
-            var result = await _weightService.EditWeightAsync(weightId, editWeightRequest, cancellationToken);
+            if (!Request.Headers.TryGetValue("X-User-Id", out var userId))
+            {
+                return BadRequest("User ID header is missing.");
+            }
+
+            var result = await _weightService.EditWeightAsync(userId!, weightId, editWeightRequest, cancellationToken);
 
             return result.Match<IActionResult>(
                 weightId => Ok(new { weightId }),
@@ -62,7 +82,12 @@ namespace WeightTracker.Controllers
             [FromForm] AddFileRequest addFileRequest,
             CancellationToken cancellationToken = default)
         {
-            var result = await _weightService.AddFileToWeightAsync(weightId, addFileRequest, cancellationToken);
+            if (!Request.Headers.TryGetValue("X-User-Id", out var userId))
+            {
+                return BadRequest("User ID header is missing.");
+            }
+
+            var result = await _weightService.AddFileToWeightAsync(userId!, weightId, addFileRequest, cancellationToken);
 
             return result.Match<IActionResult>(
                 fileId => Ok(new { fileId }),
@@ -74,7 +99,12 @@ namespace WeightTracker.Controllers
             [FromRoute] string fileId,
             CancellationToken cancellationToken = default)
         {
-            var result = await _weightService.DeleteFileFromWeightAsync(weightId, fileId, cancellationToken);
+            if (!Request.Headers.TryGetValue("X-User-Id", out var userId))
+            {
+                return BadRequest("User ID header is missing.");
+            }
+
+            var result = await _weightService.DeleteFileFromWeightAsync(userId!, weightId, fileId, cancellationToken);
 
             return result.Match<IActionResult>(
                 fileId => Ok(new { fileId }),
@@ -85,7 +115,12 @@ namespace WeightTracker.Controllers
         public async Task<IActionResult> DeleteWeight([FromRoute] string weightId,
             CancellationToken cancellationToken = default)
         {
-            var result = await _weightService.DeleteWeightAsync(weightId, cancellationToken);
+            if (!Request.Headers.TryGetValue("X-User-Id", out var userId))
+            {
+                return BadRequest("User ID header is missing.");
+            }
+
+            var result = await _weightService.DeleteWeightAsync(userId!, weightId, cancellationToken);
 
             return result.Match<IActionResult>(
                 weightId => Ok(new { weightId }),
