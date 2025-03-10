@@ -1,6 +1,11 @@
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using System.Text.Json;
 using WeightMicroservice.Services.Files;
+using WeightMicroservice.Services.RabbitMQ;
+using WeightMicroservice.Services.RabbitMQ.Handlers;
+using WeightMicroservice.Services.RabbitMQ.Models;
+using WeightMicroservice.Settings;
 using WeightTracker.Services.Weights;
 using WeightTracker.Settings;
 
@@ -46,6 +51,31 @@ builder.Services.AddSingleton(_ =>
     var defaultFileFolder = builder.Configuration["FileSettings:UploadsFolder"]!;
     return Environment.GetEnvironmentVariable("LOCAL_FILE_FOLDER_PATH") ?? defaultFileFolder;
 });
+
+// RabbitMQ settings
+var rabbitMqSettings = new RabbitMqSettings
+{
+    HostName = Environment.GetEnvironmentVariable("RABBITMQ_HOSTNAME")! ?? builder.Configuration["RabbitMQ:HostName"]!,
+    Port = int.TryParse(Environment.GetEnvironmentVariable("RABBITMQ_PORT"), out var port)
+        ? port
+        : int.Parse(builder.Configuration["RabbitMQ:Port"]!),
+    Username = Environment.GetEnvironmentVariable("RABBITMQ_DEFAULT_USER")! ?? builder.Configuration["RabbitMQ:Username"]!,
+    Password = Environment.GetEnvironmentVariable("RABBITMQ_DEFAULT_PASS")! ?? builder.Configuration["RabbitMQ:Password"]!
+};
+
+builder.Services.AddSingleton(rabbitMqSettings);
+
+// RabbitMQ configs
+var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Configs", "brokersettings.json");
+var fileContent = File.ReadAllText(filePath);
+var brokerSettings = JsonSerializer.Deserialize<List<BrokerSettings>>(fileContent)!;
+
+builder.Services.AddSingleton(brokerSettings);
+
+builder.Services.AddSingleton<IRabbitMqService, RabbitMqService>();
+builder.Services.AddSingleton<MessageDispatcher>();
+builder.Services.AddTransient<IMessageHandler<UserDeletedEvent>, UserDeletedEventHandler>();
+builder.Services.AddHostedService<RabbitMqConsumer>();
 
 builder.Services.AddScoped<IWeightService, WeightService>();
 builder.Services.AddTransient<IFileService, LocalFileService>();

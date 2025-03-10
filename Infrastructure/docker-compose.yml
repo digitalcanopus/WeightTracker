@@ -20,6 +20,7 @@
       dockerfile: Dockerfile
     depends_on:
       - db-weight
+      - rabbitmq
     env_file:
       - local.env
   user:
@@ -30,6 +31,7 @@
       dockerfile: Dockerfile
     depends_on:
       - db-user
+      - rabbitmq
     env_file:
       - local.env
   db-weight:
@@ -52,6 +54,17 @@
       - MONGO_INITDB_ROOT_PASSWORD=Oganesson123
     volumes:
       - ../mongo_user:/data/db
+  rabbitmq:
+    image: rabbitmq:4.1-rc-management-alpine
+    container_name: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    env_file:
+      - local.env
 volumes:
   mongo_weight:
   mongo_user:  

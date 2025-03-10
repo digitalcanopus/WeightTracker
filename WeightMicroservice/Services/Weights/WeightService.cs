@@ -246,5 +246,48 @@ namespace WeightTracker.Services.Weights
 
             return weightToDelete.Id;
         }
+
+        public async Task<OneOf<long, NotFound>> DeleteWeightsAsync(
+            string userId,
+            CancellationToken cancellationToken = default)
+        {
+            var weightsToDelete = await _weights
+                .Find(w => w.UserId == userId)
+                .ToListAsync(cancellationToken);
+
+            if (weightsToDelete.Count == 0)
+                return new NotFound();
+
+            var deleteResult = await _weights.DeleteManyAsync(w => w.UserId == userId, cancellationToken);
+
+            var fileIds = weightsToDelete
+                .Where(w => w.Files != null && w.Files.Length > 0)
+                .SelectMany(w => w.Files)
+                .ToArray();
+
+            if (fileIds.Length > 0)
+            {
+                var files = await _files
+                    .Find(f => fileIds.Contains(f.Id))
+                    .ToListAsync(cancellationToken);
+
+                await _files.DeleteManyAsync(f => fileIds.Contains(f.Id), cancellationToken);
+
+                foreach (var file in files)
+                {
+                    try
+                    {
+                        await _fileService.DeleteFileAsync(
+                            file.Id, file.Extension, _fileFolderName, cancellationToken);
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                }
+            }
+
+            return deleteResult.DeletedCount;
+        }
     }
 }
