@@ -43,7 +43,7 @@ namespace WeightMicroservice.Services.RabbitMQ
                     var eventObj = JsonSerializer.Deserialize(message, eventType);
                     if (eventObj != null)
                     {
-                        await _dispatcher.DispatchAsync(eventObj);
+                        await _dispatcher.DispatchAsync((dynamic)eventObj);
                     }
 
                     await channel.BasicAckAsync(ea.DeliveryTag, multiple: false);
