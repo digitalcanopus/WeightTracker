@@ -20,7 +20,7 @@ namespace UserMicroservice.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest,
             CancellationToken cancellationToken = default)
         {
-            var result = await _userService.GetUserAsync(loginRequest, cancellationToken);
+            var result = await _userService.LoginAsync(loginRequest, cancellationToken);
 
             return result.Match<IActionResult>(
                 user =>
