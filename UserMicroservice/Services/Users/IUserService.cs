@@ -7,7 +7,7 @@ namespace UserMicroservice.Services.Users
 {
     public interface IUserService
     {
-        public Task<OneOf<UserDetailsDto, NotFound>> GetUserAsync(
+        public Task<OneOf<UserDetailsDto, NotFound>> LoginAsync(
             LoginRequest loginRequest,
             CancellationToken cancellationToken = default);
 

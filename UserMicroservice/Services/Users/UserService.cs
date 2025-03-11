@@ -19,7 +19,7 @@ namespace UserMicroservice.Services.Users
             _users = database.GetCollection<User>("Users");
         }
 
-        public async Task<OneOf<UserDetailsDto, NotFound>> GetUserAsync(
+        public async Task<OneOf<UserDetailsDto, NotFound>> LoginAsync(
             LoginRequest loginRequest,
             CancellationToken cancellationToken = default)
         {
