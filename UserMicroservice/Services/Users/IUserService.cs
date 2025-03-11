@@ -14,5 +14,9 @@ namespace UserMicroservice.Services.Users
         public Task<OneOf<string, Error>> RegisterAsync(
             RegisterRequest registerRequest,
             CancellationToken cancellationToken = default);
+
+        public Task<OneOf<string, NotFound>> DeleteUserAsync(
+            string userId, 
+            CancellationToken cancelToken = default);
     }
 }

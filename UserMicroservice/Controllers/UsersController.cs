@@ -41,5 +41,20 @@ namespace UserMicroservice.Controllers
                 userId => Ok(new { userId }),
                 _ => Conflict("User already exists."));
         }
+
+        [HttpDelete("~/api/users")]
+        public async Task<IActionResult> DeleteUser(CancellationToken cancellationToken = default)
+        {
+            if (!Request.Headers.TryGetValue("X-User-Id", out var userId))
+            {
+                return BadRequest("User ID header is missing.");
+            }
+
+            var result = await _userService.DeleteUserAsync(userId!, cancellationToken);
+
+            return result.Match<IActionResult>(
+                deletedUserId => Ok(new { userId = deletedUserId }),
+                _ => NotFound("User not found."));
+        }
     }
 }

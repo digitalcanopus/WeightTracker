@@ -60,6 +60,19 @@ namespace UserMicroservice.Services.Users
             return newUser.Id;
         }
 
+        public async Task<OneOf<string, NotFound>> DeleteUserAsync(
+            string userId,
+            CancellationToken cancellationToken = default)
+        {
+            var deleteResult = await _users
+                .DeleteOneAsync(u => u.Id == userId, cancellationToken);
+
+            if (deleteResult.DeletedCount == 0)
+                return new NotFound();
+
+            return userId;
+        }
+
         private static string HashPassword(string password)
         {
             var bytes = Encoding.UTF8.GetBytes(password);
