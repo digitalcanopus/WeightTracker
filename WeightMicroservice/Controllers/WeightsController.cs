@@ -23,9 +23,7 @@ namespace WeightTracker.Controllers
 
             var result = await _weightService.GetWeightsAsync(userId!, cancellationToken);
 
-            return result.Match<IActionResult>(
-                weights => Ok(weights.Adapt<List<WeightDetailsResponse>>()),
-                _ => NotFound());
+            return Ok(result.Adapt<List<WeightDetailsResponse>>());
         }
 
         [HttpGet("~/api/weights/{weightId:length(24)}")]

@@ -8,7 +8,7 @@ namespace WeightTracker.Services.Weights
 {
     public interface IWeightService
     {
-        public Task<OneOf<List<WeightDetailsDto>, NotFound>> GetWeightsAsync(
+        public Task<List<WeightDetailsDto>> GetWeightsAsync(
             string userId,
             CancellationToken cancellationToken = default);
 

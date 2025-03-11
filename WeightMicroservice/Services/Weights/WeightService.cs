@@ -27,7 +27,7 @@ namespace WeightTracker.Services.Weights
             _fileService = fileService;
         }
 
-        public async Task<OneOf<List<WeightDetailsDto>, NotFound>> GetWeightsAsync(
+        public async Task<List<WeightDetailsDto>> GetWeightsAsync(
             string userId,
             CancellationToken cancellationToken = default)
         {
@@ -36,7 +36,7 @@ namespace WeightTracker.Services.Weights
                 .ToListAsync(cancellationToken);
 
             if (weights.Count == 0)
-                return new NotFound();
+                return [];
 
             var fileIds = weights.SelectMany(w => w.Files ?? []);
 
