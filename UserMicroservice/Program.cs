@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using System.Text.Json;
+using UserMicroservice.Services.RabbitMQ;
 using UserMicroservice.Services.Tokens;
 using UserMicroservice.Services.Users;
 using UserMicroservice.Settings;
@@ -41,15 +43,41 @@ builder.Services.AddScoped<IMongoDatabase>(sp =>
     return client.GetDatabase(env ?? settings.DatabaseName);
 });
 
-var jwtSettings = builder.Configuration.GetSection("JWT").Get<JwtSettings>() ?? new JwtSettings
+// JWT settings
+var jwtSettings = new JwtSettings
 {
-    Key = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")!,
-    Issuer = Environment.GetEnvironmentVariable("JWT_ISSUER")!,
-    Audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")!,
-    ExpMin = int.Parse(Environment.GetEnvironmentVariable("JWT_EXP_MIN")!)
+    Key = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")! ?? builder.Configuration["JWT:Key"]!,
+    Issuer = Environment.GetEnvironmentVariable("JWT_ISSUER")! ?? builder.Configuration["JWT:Issuer"]!,
+    Audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")! ?? builder.Configuration["JWT:Audience"]!,
+    ExpMin = int.TryParse(Environment.GetEnvironmentVariable("JWT_EXP_MIN"), out var expMin)
+        ? expMin
+        : int.Parse(builder.Configuration["JWT:ExpMin"]!)
 };
 
 builder.Services.AddSingleton(jwtSettings);
+
+// RabbitMQ settings
+var rabbitMqSettings = new RabbitMqSettings
+{
+    HostName = Environment.GetEnvironmentVariable("RABBITMQ_HOSTNAME")! ?? builder.Configuration["RabbitMQ:HostName"]!,
+    Port = int.TryParse(Environment.GetEnvironmentVariable("RABBITMQ_PORT"), out var port)
+        ? port
+        : int.Parse(builder.Configuration["RabbitMQ:Port"]!),
+    Username = Environment.GetEnvironmentVariable("RABBITMQ_DEFAULT_USER")! ?? builder.Configuration["RabbitMQ:Username"]!,
+    Password = Environment.GetEnvironmentVariable("RABBITMQ_DEFAULT_PASS")! ?? builder.Configuration["RabbitMQ:Password"]!
+};
+
+builder.Services.AddSingleton(rabbitMqSettings);
+
+// RabbitMQ configs
+var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Configs", "brokersettings.json");
+var fileContent = File.ReadAllText(filePath);
+var brokerSettings = JsonSerializer.Deserialize<List<BrokerSettings>>(fileContent)!;
+
+builder.Services.AddSingleton(brokerSettings);
+
+builder.Services.AddSingleton<IRabbitMqService, RabbitMqService>();
+builder.Services.AddSingleton<IUserEventPublisher, UserEventPublisher>();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserService, UserService>();

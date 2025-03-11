@@ -13,10 +13,12 @@ namespace UserMicroservice.Services.Users
     public class UserService : IUserService
     {
         private readonly IMongoCollection<User> _users;
+        private readonly IUserEventPublisher _userEventPublisher;
 
-        public UserService(IMongoDatabase database)
+        public UserService(IMongoDatabase database, IUserEventPublisher userEventPublisher)
         {
             _users = database.GetCollection<User>("Users");
+            _userEventPublisher = userEventPublisher;
         }
 
         public async Task<OneOf<UserDetailsDto, NotFound>> LoginAsync(
@@ -69,6 +71,8 @@ namespace UserMicroservice.Services.Users
 
             if (deleteResult.DeletedCount == 0)
                 return new NotFound();
+
+            await _userEventPublisher.UserDeleted(userId);
 
             return userId;
         }

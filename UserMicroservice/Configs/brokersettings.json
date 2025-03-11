@@ -1,0 +1,7 @@
+[
+    {
+        "ExchangeName": "UserExchange",
+        "QueueName": "WeightQueue",
+        "RoutingKey": "User.Deleted"
+    }
+]
