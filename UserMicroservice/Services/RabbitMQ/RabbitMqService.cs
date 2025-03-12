@@ -12,7 +12,7 @@ namespace UserMicroservice.Services.RabbitMQ
 
         private IConnection? _connection;
         private IChannel? _channel;
-        private SemaphoreSlim _connectionLock = new SemaphoreSlim(1, 1);
+        private SemaphoreSlim _connectionLock = new(1, 1);
 
         public RabbitMqService(RabbitMqSettings rabbitMqSettings, List<BrokerSettings> brokerSettings)
         {
@@ -50,10 +50,7 @@ namespace UserMicroservice.Services.RabbitMQ
             await _connectionLock.WaitAsync();
             try
             {
-                if (_connection == null)
-                {
-                    _connection = await _factory.CreateConnectionAsync();
-                }
+                _connection ??= await _factory.CreateConnectionAsync();
 
                 if (_channel == null)
                 {
@@ -82,32 +79,5 @@ namespace UserMicroservice.Services.RabbitMQ
                 _connectionLock.Release();
             }
         }
-
-        //private async Task CreateConnection()
-        //{
-        //    _connection = await _factory.CreateConnectionAsync();
-        //}
-
-        //private async Task CreateChannel()
-        //{
-        //    _channel = await _connection!.CreateChannelAsync();
-        //    await _channel.BasicQosAsync(0, 1, false);
-
-        //    foreach (var exchange in ExchangeEnum.List)
-        //    {
-        //        await _channel.ExchangeDeclareAsync(exchange.Name, ExchangeType.Topic, durable: true);
-        //    }
-
-        //    foreach (var queue in QueueEnum.List)
-        //    {
-        //        await _channel.QueueDeclareAsync(queue.Name, durable: true, exclusive: false, autoDelete: false);
-        //    }
-
-        //    foreach (var brokerSetting in _brokerSettings)
-        //    {
-        //        await _channel.QueueBindAsync(
-        //            brokerSetting.QueueName, brokerSetting.ExchangeName, brokerSetting.RoutingKey);
-        //    }
-        //}
     }
 }
