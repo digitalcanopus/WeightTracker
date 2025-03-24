@@ -45,7 +45,7 @@ namespace WeightTracker.Services.Weights
             string weightId,
             CancellationToken cancellationToken = default);
 
-        public Task<OneOf<long, NotFound>> DeleteWeightsAsync(
+        public Task<OneOf<List<string>, NotFound>> DeleteWeightsAsync(
             string userId,
             CancellationToken cancellationToken = default);
     }

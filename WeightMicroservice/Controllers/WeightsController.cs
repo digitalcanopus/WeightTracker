@@ -11,7 +11,10 @@ namespace WeightTracker.Controllers
     {
         private readonly IWeightService _weightService;
 
-        public WeightsController(IWeightService weightService) => _weightService = weightService;
+        public WeightsController(IWeightService weightService)
+        {
+            _weightService = weightService;
+        }
 
         [HttpGet("~/api/weights")]
         public async Task<IActionResult> GetWeights(CancellationToken cancellationToken = default)
@@ -43,7 +46,7 @@ namespace WeightTracker.Controllers
         }
 
         [HttpPost("~/api/weights")]
-        public async Task<IActionResult> AddWeight([FromBody] AddWeightRequest addWeightRequest,
+        public async Task<IActionResult> AddWeight([FromForm] AddWeightRequest addWeightRequest,
             CancellationToken cancellationToken = default)
         {
             if (!Request.Headers.TryGetValue("X-User-Id", out var userId))

@@ -5,25 +5,20 @@ using WeightTracker.Entities;
 using WeightTracker.Services.Weights.Models;
 using Mapster;
 using WeightTracker.Services.Weights.Requests;
-using File = WeightTracker.Entities.File;
 using WeightMicroservice.Services.Files;
-using WeightMicroservice.Services.Weights.Requests;
 using WeightMicroservice.Services.Files.Models;
+using WeightMicroservice.Services.Weights.Requests;
 
 namespace WeightTracker.Services.Weights
 {
     public class WeightService : IWeightService
     {
         private readonly IMongoCollection<Weight> _weights;
-        private readonly IMongoCollection<File> _files;
         private readonly IFileService _fileService;
-        private readonly string _fileFolderName;
 
-        public WeightService(IMongoDatabase database, string fileFolderName, IFileService fileService)
+        public WeightService(IMongoDatabase database, IFileService fileService)
         {
             _weights = database.GetCollection<Weight>("Weights");
-            _files = database.GetCollection<File>("Files");
-            _fileFolderName = fileFolderName;
             _fileService = fileService;
         }
 
@@ -38,11 +33,9 @@ namespace WeightTracker.Services.Weights
             if (weights.Count == 0)
                 return [];
 
-            var fileIds = weights.SelectMany(w => w.Files ?? []);
+            var fileIds = weights.SelectMany(w => w.Files ?? []).ToArray();
 
-            var files = await _files
-                .Find(f => fileIds.Contains(f.Id))
-                .ToListAsync(cancellationToken);
+            var files = await _fileService.GetFilesByIdsAsync(fileIds, cancellationToken);
 
             var fileDictionary = files.ToDictionary(f => f.Id);
 
@@ -71,9 +64,7 @@ namespace WeightTracker.Services.Weights
 
             var fileIds = weight.Files ?? [];
 
-            var files = await _files
-                .Find(f => fileIds.Contains(f.Id))
-                .ToListAsync(cancellationToken);
+            var files = await _fileService.GetFilesByIdsAsync(fileIds, cancellationToken);
 
             var fileDictionary = files.ToDictionary(f => f.Id);
 
@@ -100,6 +91,26 @@ namespace WeightTracker.Services.Weights
 
             await _weights
                 .InsertOneAsync(weightToAdd, cancellationToken: cancellationToken);
+
+            if (addWeightRequest.Files.Count != 0)
+            {
+                List<AddFileRequest> fileRequests = addWeightRequest.Files
+                    .Select(file => new AddFileRequest(file))
+                    .ToList();
+
+                var fileIdsResult = await _fileService.AddFilesAsync(fileRequests, cancellationToken);
+
+                if (fileIdsResult.IsT0)
+                {
+                    weightToAdd.Files = [.. fileIdsResult.AsT0];
+                    var update = Builders<Weight>.Update.Set(w => w.Files, weightToAdd.Files);
+
+                    await _weights.UpdateOneAsync(
+                        w => w.Id == weightToAdd.Id,
+                        update,
+                        cancellationToken: cancellationToken);
+                }
+            }
 
             return weightToAdd.Id;
         }
@@ -140,25 +151,23 @@ namespace WeightTracker.Services.Weights
             if (weight == null)
                 return new NotFound();
 
-            var fileToInsert = new File
-            {
-                Extension = Path.GetExtension(addFileRequest.File.FileName),
-                OriginalName = addFileRequest.File.FileName
-            };
+            var addFileResult = await _fileService.
+                AddFilesAsync([addFileRequest], cancellationToken);
 
-            await _files
-                .InsertOneAsync(fileToInsert, cancellationToken: cancellationToken);
+            if (addFileResult.IsT1)
+                return new NotFound();
 
-            await _fileService.SaveFileAsync(
-                addFileRequest.File, fileToInsert.Id, _fileFolderName, cancellationToken);
+            var fileId = addFileResult.AsT0.First();
 
             var update = Builders<Weight>.Update
-                .Push(w => w.Files, fileToInsert.Id);
+                .Push(w => w.Files, fileId);
 
-            await _weights
-                .UpdateOneAsync(w => w.Id == weightId && w.UserId == userId, update, cancellationToken: cancellationToken);
+            await _weights.UpdateOneAsync(
+                w => w.Id == weightId && w.UserId == userId,
+                update,
+                cancellationToken: cancellationToken);
 
-            return fileToInsert.Id;
+            return fileId;
         }
 
         public async Task<OneOf<string, NotFound>> DeleteFileFromWeightAsync(
@@ -177,33 +186,15 @@ namespace WeightTracker.Services.Weights
             if (weight == null)
                 return new NotFound();
 
-            var fileToDelete = await _files
-                .Find(f => f.Id == fileId)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (fileToDelete == null)
-                return new NotFound();
-
             var update = Builders<Weight>.Update
                 .Pull(w => w.Files, fileId);
 
             await _weights
                 .UpdateOneAsync(w => w.Id == weightId && w.UserId == userId, update, cancellationToken: cancellationToken);
 
-            await _files
-                .DeleteOneAsync(f => f.Id == fileId, cancellationToken: cancellationToken);
+            var deletedFiles = await _fileService.DeleteFilesAsync([fileId], cancellationToken);
 
-            try
-            {
-                await _fileService.DeleteFileAsync(
-                    fileToDelete.Id, fileToDelete.Extension, _fileFolderName, cancellationToken);
-            }
-            catch
-            {
-                return new NotFound();
-            }
-
-            return fileToDelete.Id;
+            return deletedFiles.Count > 0 ? fileId : new NotFound();
         }
 
         public async Task<OneOf<string, NotFound>> DeleteWeightAsync(
@@ -221,33 +212,15 @@ namespace WeightTracker.Services.Weights
             await _weights
                 .DeleteOneAsync(w => w.Id == weightId && w.UserId == userId, cancellationToken);
 
-            if (weightToDelete.Files == null || weightToDelete.Files.Length == 0)
-                return weightToDelete.Id;
-
-            var files = await _files
-                .Find(f => weightToDelete.Files.Contains(f.Id))
-                .ToListAsync(cancellationToken);
-
-            await _files
-                .DeleteManyAsync(f => weightToDelete.Files.Contains(f.Id), cancellationToken);
-
-            foreach (var file in files)
+            if (weightToDelete.Files.Length > 0)
             {
-                try
-                {
-                    await _fileService.DeleteFileAsync(
-                        file.Id, file.Extension, _fileFolderName, cancellationToken);
-                }
-                catch
-                {
-                    continue;
-                }
+                await _fileService.DeleteFilesAsync(weightToDelete.Files, cancellationToken);
             }
 
             return weightToDelete.Id;
         }
 
-        public async Task<OneOf<long, NotFound>> DeleteWeightsAsync(
+        public async Task<OneOf<List<string>, NotFound>> DeleteWeightsAsync(
             string userId,
             CancellationToken cancellationToken = default)
         {
@@ -258,6 +231,8 @@ namespace WeightTracker.Services.Weights
             if (weightsToDelete.Count == 0)
                 return new NotFound();
 
+            var weightIdsToDelete = weightsToDelete.Select(w => w.Id).ToList();
+
             var deleteResult = await _weights.DeleteManyAsync(w => w.UserId == userId, cancellationToken);
 
             var fileIds = weightsToDelete
@@ -267,27 +242,10 @@ namespace WeightTracker.Services.Weights
 
             if (fileIds.Length > 0)
             {
-                var files = await _files
-                    .Find(f => fileIds.Contains(f.Id))
-                    .ToListAsync(cancellationToken);
-
-                await _files.DeleteManyAsync(f => fileIds.Contains(f.Id), cancellationToken);
-
-                foreach (var file in files)
-                {
-                    try
-                    {
-                        await _fileService.DeleteFileAsync(
-                            file.Id, file.Extension, _fileFolderName, cancellationToken);
-                    }
-                    catch
-                    {
-                        continue;
-                    }
-                }
+                await _fileService.DeleteFilesAsync(fileIds, cancellationToken);
             }
 
-            return deleteResult.DeletedCount;
+            return weightIdsToDelete;
         }
     }
 }

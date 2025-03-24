@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using System.Text.Json;
+using WeightMicroservice.Helpers;
 using WeightMicroservice.Services.Files;
 using WeightMicroservice.Services.RabbitMQ;
 using WeightMicroservice.Services.RabbitMQ.Handlers;
@@ -78,7 +79,8 @@ builder.Services.AddTransient<IMessageHandler<UserDeletedEvent>, UserDeletedEven
 builder.Services.AddHostedService<RabbitMqConsumer>();
 
 builder.Services.AddScoped<IWeightService, WeightService>();
-builder.Services.AddTransient<IFileService, LocalFileService>();
+builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddTransient<IStorageHelper, LocalStorageHelper>();
 
 var app = builder.Build();
 
