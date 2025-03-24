@@ -3,6 +3,7 @@
     public record AddWeightRequest 
     (
         decimal WeightValue,
-        DateTime Date
+        DateTime Date,
+        List<IFormFile> Files
     );
 }

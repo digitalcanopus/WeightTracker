@@ -51,6 +51,21 @@ namespace ApiGateway.Services
                 fileStreamContent.Headers.ContentType = new MediaTypeHeaderValue(fileRequest.File.ContentType);
                 multipartContent.Add(fileStreamContent, "File", fileRequest.File.FileName);
             }
+            else if (body is AddWeightRequest weightRequest)
+            {
+                multipartContent.Add(new StringContent(weightRequest.WeightValue.ToString()), "WeightValue");
+                multipartContent.Add(new StringContent(weightRequest.Date.ToString("o")), "Date");
+
+                if (weightRequest.Files != null)
+                {
+                    foreach (var file in weightRequest.Files)
+                    {
+                        var fileStreamContent = new StreamContent(file.OpenReadStream());
+                        fileStreamContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+                        multipartContent.Add(fileStreamContent, "Files", file.FileName);
+                    }
+                }
+            }
 
             return await ForwardRequest(HttpMethod.Post, url, userId, multipartContent);
         }

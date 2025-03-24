@@ -39,12 +39,12 @@ namespace ApiGateway.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddWeight([FromBody] AddWeightRequest addWeightRequest)
+        public async Task<IActionResult> AddWeight([FromForm] AddWeightRequest addWeightRequest)
         {
             var userId = User.FindFirstValue("userId");
 
             var weightServiceUrl = $"{_microserviceEndpoints.WeightMicroservice}/api/weights";
-            return await _httpService.ForwardPostRequest(weightServiceUrl, addWeightRequest, userId);
+            return await _httpService.ForwardMultipartRequest(weightServiceUrl, addWeightRequest, userId);
         }
 
         [HttpPut("{weightId}")]
