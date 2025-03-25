@@ -1,4 +1,5 @@
 ﻿using RabbitMQ.Client;
+using System.Text;
 using WeightMicroservice.Services.RabbitMQ.Enums;
 using WeightMicroservice.Settings;
 
@@ -11,6 +12,7 @@ namespace WeightMicroservice.Services.RabbitMQ
 
         private IConnection? _connection;
         private IChannel? _channel;
+        private readonly SemaphoreSlim _connectionLock = new(1, 1);
 
         public RabbitMqService(RabbitMqSettings rabbitMqSettings, List<BrokerSettings> brokerSettings)
         {
@@ -27,31 +29,61 @@ namespace WeightMicroservice.Services.RabbitMQ
 
         public async Task<IChannel> GetChannelAsync()
         {
-            _connection ??= await _factory.CreateConnectionAsync();
+            await EnsureConnectionAsync();
+            return _channel!;
+        }
 
-            if (_channel != null)
-                return _channel;
+        public async Task PublishMessageAsync(string exchange, string routingKey, string message)
+        {
+            await EnsureConnectionAsync();
 
-            _channel = await _connection.CreateChannelAsync();
-            await _channel.BasicQosAsync(0, 1, false);
+            var body = Encoding.UTF8.GetBytes(message);
+            var properties = new BasicProperties();
 
-            foreach (var exchange in ExchangeEnum.List)
+            await _channel!.BasicPublishAsync(
+                exchange,
+                routingKey,
+                mandatory: false,
+                basicProperties: properties,
+                body: body);
+        }
+
+        private async Task EnsureConnectionAsync()
+        {
+            if (_connection != null && _channel != null)
+                return;
+
+            await _connectionLock.WaitAsync();
+            try
             {
-                await _channel.ExchangeDeclareAsync(exchange.Name, ExchangeType.Topic, durable: true);
-            }
+                _connection ??= await _factory.CreateConnectionAsync();
 
-            foreach (var queue in QueueEnum.List)
+                if (_channel == null)
+                {
+                    _channel = await _connection.CreateChannelAsync();
+                    await _channel.BasicQosAsync(0, 1, false);
+
+                    foreach (var exchange in ExchangeEnum.List)
+                    {
+                        await _channel.ExchangeDeclareAsync(exchange.Name, ExchangeType.Topic, durable: true);
+                    }
+
+                    foreach (var queue in QueueEnum.List)
+                    {
+                        await _channel.QueueDeclareAsync(queue.Name, durable: true, exclusive: false, autoDelete: false);
+                    }
+
+                    foreach (var brokerSetting in _brokerSettings)
+                    {
+                        await _channel.QueueBindAsync(
+                            brokerSetting.QueueName, brokerSetting.ExchangeName, brokerSetting.RoutingKey);
+                    }
+                }
+            }
+            finally
             {
-                await _channel.QueueDeclareAsync(queue.Name, durable: true, exclusive: false, autoDelete: false);
+                _connectionLock.Release();
             }
-
-            foreach (var brokerSetting in _brokerSettings)
-            {
-                await _channel.QueueBindAsync(
-                    brokerSetting.QueueName, brokerSetting.ExchangeName, brokerSetting.RoutingKey);
-            }
-
-            return _channel;
         }
     }
 }

@@ -4,6 +4,7 @@ using OneOf;
 using OneOf.Types;
 using WeightMicroservice.Services.Weights.Requests;
 using WeightMicroservice.Services.Files.Requests;
+using WeightMicroservice.Services.Weights;
 using WeightMicroservice.Helpers;
 
 namespace WeightMicroservice.Services.Files
@@ -11,11 +12,14 @@ namespace WeightMicroservice.Services.Files
     public class FileService : IFileService
     {
         private readonly IMongoCollection<File> _files;
+        private readonly IWeightEventPublisher _weightEventPublisher;
+
         private readonly IStorageHelper _localStorageHelper;
 
-        public FileService(IMongoDatabase database, IStorageHelper localStorageHelper)
+        public FileService(IMongoDatabase database, IWeightEventPublisher weightEventPublisher, IStorageHelper localStorageHelper)
         {
             _files = database.GetCollection<File>("Files");
+            _weightEventPublisher = weightEventPublisher;
             _localStorageHelper = localStorageHelper;
         }
 
@@ -74,7 +78,8 @@ namespace WeightMicroservice.Services.Files
                 .Select(f => new DeleteFileRequest(f.Id, f.Extension))
                 .ToList();
 
-            await _localStorageHelper.DeleteFilesAsync(deleteRequests, cancellationToken);
+            //await _localStorageHelper.DeleteFilesAsync(deleteRequests, cancellationToken);
+            await _weightEventPublisher.WeightDeleted(deleteRequests);
 
             return deletedFileIds;
         }

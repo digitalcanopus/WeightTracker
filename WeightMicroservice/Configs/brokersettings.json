@@ -1,2 +1,7 @@
 [
+    {
+        "ExchangeName": "WeightExchange",
+        "QueueName": "WeightQueue",
+        "RoutingKey": "Weight.Deleted"
+    }
 ]

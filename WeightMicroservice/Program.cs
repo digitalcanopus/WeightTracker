@@ -6,6 +6,7 @@ using WeightMicroservice.Services.Files;
 using WeightMicroservice.Services.RabbitMQ;
 using WeightMicroservice.Services.RabbitMQ.Handlers;
 using WeightMicroservice.Services.RabbitMQ.Models;
+using WeightMicroservice.Services.Weights;
 using WeightMicroservice.Settings;
 using WeightTracker.Services.Weights;
 using WeightTracker.Settings;
@@ -76,7 +77,9 @@ builder.Services.AddSingleton(brokerSettings);
 builder.Services.AddSingleton<IRabbitMqService, RabbitMqService>();
 builder.Services.AddSingleton<MessageDispatcher>();
 builder.Services.AddTransient<IMessageHandler<UserDeletedEvent>, UserDeletedEventHandler>();
+builder.Services.AddTransient<IMessageHandler<WeightDeletedEvent>, WeightDeletedEventHandler>();
 builder.Services.AddHostedService<RabbitMqConsumer>();
+builder.Services.AddSingleton<IWeightEventPublisher, WeightEventPublisher>();
 
 builder.Services.AddScoped<IWeightService, WeightService>();
 builder.Services.AddScoped<IFileService, FileService>();
