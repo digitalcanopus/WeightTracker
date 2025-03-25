@@ -2,6 +2,6 @@
     {
         "ExchangeName": "WeightExchange",
         "QueueName": "WeightQueue",
-        "RoutingKey": "Weight.Deleted"
+        "RoutingKey": "Files.Deleted"
     }
 ]

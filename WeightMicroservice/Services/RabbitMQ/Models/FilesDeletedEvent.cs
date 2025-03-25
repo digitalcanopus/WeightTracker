@@ -2,7 +2,7 @@
 
 namespace WeightMicroservice.Services.RabbitMQ.Models
 {
-    public record WeightDeletedEvent
+    public record FilesDeletedEvent
     {
         public List<DeleteFileRequest> DeleteFileRequests { get; set; } = [];
     }

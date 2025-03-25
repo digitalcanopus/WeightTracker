@@ -3,18 +3,18 @@ using WeightMicroservice.Services.RabbitMQ.Models;
 
 namespace WeightMicroservice.Services.RabbitMQ.Handlers
 {
-    public class WeightDeletedEventHandler : IMessageHandler<WeightDeletedEvent>
+    public class FilesDeletedEventHandler : IMessageHandler<FilesDeletedEvent>
     {
         private readonly IStorageHelper _localStorageHelper;
 
-        public WeightDeletedEventHandler(IStorageHelper localStorageHelper)
+        public FilesDeletedEventHandler(IStorageHelper localStorageHelper)
         {
             _localStorageHelper = localStorageHelper;
         }
 
-        public async Task HandleAsync(WeightDeletedEvent message)
+        public async Task HandleAsync(FilesDeletedEvent message)
         {
-            Console.WriteLine($"Weight deleted. Start deleting files");
+            Console.WriteLine($"Files deleted. Start deleting files from the server");
 
             await _localStorageHelper.DeleteFilesAsync(message.DeleteFileRequests);
         }

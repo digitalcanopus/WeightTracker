@@ -78,8 +78,7 @@ namespace WeightMicroservice.Services.Files
                 .Select(f => new DeleteFileRequest(f.Id, f.Extension))
                 .ToList();
 
-            //await _localStorageHelper.DeleteFilesAsync(deleteRequests, cancellationToken);
-            await _weightEventPublisher.WeightDeleted(deleteRequests);
+            await _weightEventPublisher.FilesDeleted(deleteRequests);
 
             return deletedFileIds;
         }

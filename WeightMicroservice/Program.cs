@@ -77,7 +77,7 @@ builder.Services.AddSingleton(brokerSettings);
 builder.Services.AddSingleton<IRabbitMqService, RabbitMqService>();
 builder.Services.AddSingleton<MessageDispatcher>();
 builder.Services.AddTransient<IMessageHandler<UserDeletedEvent>, UserDeletedEventHandler>();
-builder.Services.AddTransient<IMessageHandler<WeightDeletedEvent>, WeightDeletedEventHandler>();
+builder.Services.AddTransient<IMessageHandler<FilesDeletedEvent>, FilesDeletedEventHandler>();
 builder.Services.AddHostedService<RabbitMqConsumer>();
 builder.Services.AddSingleton<IWeightEventPublisher, WeightEventPublisher>();
 

@@ -7,7 +7,7 @@ namespace WeightMicroservice.Services.RabbitMQ.Utils
         private static readonly Dictionary<string, Type> EventTypeMappings = new()
         {
             { "User.Deleted", typeof(UserDeletedEvent) },
-            { "Weight.Deleted", typeof(WeightDeletedEvent) }
+            { "Files.Deleted", typeof(FilesDeletedEvent) }
         };
 
         public static Type? Resolve(string routingKey)

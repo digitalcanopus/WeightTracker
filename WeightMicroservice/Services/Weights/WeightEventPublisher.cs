@@ -15,14 +15,14 @@ namespace WeightMicroservice.Services.Weights
             _rabbitMqService = rabbitMqService;
         }
 
-        public async Task WeightDeleted(List<DeleteFileRequest> deleteFileRequests)
+        public async Task FilesDeleted(List<DeleteFileRequest> deleteFileRequests)
         {
-            var weightDeletedEvent = new WeightDeletedEvent { DeleteFileRequests = deleteFileRequests };
-            var message = JsonSerializer.Serialize(weightDeletedEvent);
+            var filesDeletedEvent = new FilesDeletedEvent { DeleteFileRequests = deleteFileRequests };
+            var message = JsonSerializer.Serialize(filesDeletedEvent);
 
             await _rabbitMqService.PublishMessageAsync(
                 ExchangeEnum.WeightExchange.Name,
-                RoutingKeyEnum.WeightDeleted.Name,
+                RoutingKeyEnum.FilesDeleted.Name,
                 message);
         }
     }
